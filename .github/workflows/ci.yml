@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest -q
+
+  self-scan:
+    # The scanner scans its own repository, history included, using the GitHub Action defined here.
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: scan
+        uses: ./
+        with:
+          git-history: "true"
+          sarif-file: secrets-scanner.sarif
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always() && github.event_name == 'push'
+        continue-on-error: true
+        with:
+          sarif_file: secrets-scanner.sarif

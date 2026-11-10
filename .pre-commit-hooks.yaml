@@ -1,0 +1,7 @@
+- id: secrets-scanner
+  name: secrets-scanner
+  description: Block commits that add hard-coded secrets
+  entry: secrets-scanner --staged
+  language: python
+  pass_filenames: false
+  always_run: true
