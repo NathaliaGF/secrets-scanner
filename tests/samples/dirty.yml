@@ -1,0 +1,5 @@
+# Intentional test file: FAKE credentials, none of them are real.
+database:
+  user: app
+  password: Xk9#mQ2vLp7zRt
+  api_key: 9fA3kLm2Qx7ZpR4tVb8NzzQ

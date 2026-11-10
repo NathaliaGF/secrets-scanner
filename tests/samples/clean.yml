@@ -1,0 +1,8 @@
+# Clean: values come from the environment or are placeholders.
+database:
+  host: db.internal
+  user: app
+  password: ${DB_PASSWORD}
+  api_key: "{{ vault_api_key }}"
+  secret: changeme
+  token: <your-token>

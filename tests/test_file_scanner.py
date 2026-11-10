@@ -6,7 +6,7 @@ binary detection, and directory scan.
 import os
 import pytest
 
-from scanner.file_scanner import (
+from secrets_scanner.file_scanner import (
     _entropy,
     _is_placeholder,
     _is_binary,
