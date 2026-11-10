@@ -5,8 +5,8 @@ and does NOT fire on safe alternatives.
 """
 
 import pytest
-from scanner.rules import RULES_BY_ID
-from scanner.file_scanner import _check_line
+from secrets_scanner.rules import RULES_BY_ID
+from secrets_scanner.file_scanner import _check_line
 
 
 def fires(rule_id: str, line: str) -> bool:
@@ -237,28 +237,28 @@ class TestSS015:
 class TestSampleFiles:
     def test_dirty_py_has_findings(self):
         import os
-        from scanner.file_scanner import scan_file
+        from secrets_scanner.file_scanner import scan_file
         sample = os.path.join(os.path.dirname(__file__), "samples", "dirty.py")
         findings = scan_file(sample)
         assert len(findings) >= 5, f"Expected ≥5 findings, got {len(findings)}"
 
     def test_clean_py_has_no_findings(self):
         import os
-        from scanner.file_scanner import scan_file
+        from secrets_scanner.file_scanner import scan_file
         sample = os.path.join(os.path.dirname(__file__), "samples", "clean.py")
         findings = scan_file(sample)
         assert findings == [], f"Unexpected findings in clean.py: {[f.rule_id for f in findings]}"
 
     def test_dirty_env_has_findings(self):
         import os
-        from scanner.file_scanner import scan_file
+        from secrets_scanner.file_scanner import scan_file
         sample = os.path.join(os.path.dirname(__file__), "samples", "dirty.env")
         findings = scan_file(sample)
         assert len(findings) >= 3, f"Expected ≥3 findings, got {len(findings)}"
 
     def test_clean_env_has_no_findings(self):
         import os
-        from scanner.file_scanner import scan_file
+        from secrets_scanner.file_scanner import scan_file
         sample = os.path.join(os.path.dirname(__file__), "samples", "clean.env")
         findings = scan_file(sample)
         assert findings == [], f"Unexpected findings in clean.env: {[f.rule_id for f in findings]}"
