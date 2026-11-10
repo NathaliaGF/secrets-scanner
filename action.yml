@@ -1,0 +1,60 @@
+name: secrets-scanner
+description: Scan a repository for hard-coded secrets and produce a SARIF report for GitHub Code Scanning.
+author: Nathalia Gomes
+branding:
+  icon: shield
+  color: green
+
+inputs:
+  path:
+    description: Directory to scan.
+    default: "."
+  severity:
+    description: Minimum severity to report and fail on (CRITICAL, HIGH, MEDIUM, LOW).
+    default: "LOW"
+  git-history:
+    description: Also scan git history (needs actions/checkout with fetch-depth 0).
+    default: "false"
+  max-commits:
+    description: Commits to scan when git-history is true (0 = all).
+    default: "500"
+  sarif-file:
+    description: Where to write the SARIF report.
+    default: "secrets-scanner.sarif"
+  fail-on-findings:
+    description: Fail the job when findings remain after filters and baseline.
+    default: "true"
+  baseline:
+    description: Optional baseline file; only findings not in it are reported.
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - name: Install secrets-scanner
+      shell: bash
+      run: python -m pip install --quiet "${{ github.action_path }}"
+    - name: Scan
+      shell: bash
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_SEVERITY: ${{ inputs.severity }}
+        INPUT_GIT: ${{ inputs.git-history }}
+        INPUT_MAX_COMMITS: ${{ inputs.max-commits }}
+        INPUT_SARIF: ${{ inputs.sarif-file }}
+        INPUT_FAIL: ${{ inputs.fail-on-findings }}
+        INPUT_BASELINE: ${{ inputs.baseline }}
+      run: |
+        args=(--dir "$INPUT_PATH" --severity "$INPUT_SEVERITY" --no-color)
+        [ "$INPUT_GIT" = "true" ] && args+=(--git --max-commits "$INPUT_MAX_COMMITS")
+        [ -n "$INPUT_BASELINE" ] && args+=(--baseline "$INPUT_BASELINE")
+        [ "$INPUT_FAIL" = "true" ] || args+=(--exit-zero)
+        # human-readable report in the job log, SARIF as a file
+        secrets-scanner "${args[@]}" --output-file "$INPUT_SARIF.txt" --output terminal || status=$?
+        secrets-scanner "${args[@]}" --output sarif --output-file "$INPUT_SARIF" || true
+        cat "$INPUT_SARIF.txt"
+        rm -f "$INPUT_SARIF.txt"
+        exit "${status:-0}"
